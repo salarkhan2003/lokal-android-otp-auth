@@ -1,0 +1,3 @@
+# This would be the actual gradle-wrapper.jar binary file
+# In a real project, this would be downloaded automatically by Gradle
+# For this demo, this is a placeholder indicating where the JAR would be located
