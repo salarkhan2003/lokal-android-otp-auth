@@ -49,27 +49,19 @@ class MainActivity : ComponentActivity() {
 fun AuthApp(
     viewModel: AuthViewModel = viewModel()
 ) {
-    // Collect state from ViewModel
+    // Collect state from ViewModel directly
     val state by viewModel.state.collectAsState()
-    
-    // Use rememberSaveable to survive configuration changes
-    var savedState by rememberSaveable { mutableStateOf(state) }
-    
-    // Update saved state when state changes
-    LaunchedEffect(state) {
-        savedState = state
-    }
     
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
-        when (savedState.currentScreen) {
+        when (state.currentScreen) {
             AuthScreen.Login -> {
                 LoginScreen(
-                    email = savedState.email,
-                    isEmailValid = savedState.isEmailValid,
-                    isGeneratingOtp = savedState.isGeneratingOtp,
-                    errorMessage = savedState.errorMessage,
+                    email = state.email,
+                    isEmailValid = state.isEmailValid,
+                    isGeneratingOtp = state.isGeneratingOtp,
+                    errorMessage = state.errorMessage,
                     onEmailChanged = viewModel::onEmailChanged,
                     onGenerateOtp = viewModel::generateOtp,
                     onClearError = viewModel::clearError,
@@ -79,13 +71,14 @@ fun AuthApp(
             
             AuthScreen.Otp -> {
                 OtpScreen(
-                    email = savedState.email,
-                    otpInput = savedState.otpInput,
-                    otpTimeRemaining = savedState.otpTimeRemaining,
-                    otpAttemptsRemaining = savedState.otpAttemptsRemaining,
-                    isOtpExpired = savedState.isOtpExpired,
-                    otpError = savedState.otpError,
-                    isValidatingOtp = savedState.isValidatingOtp,
+                    email = state.email,
+                    otpInput = state.otpInput,
+                    otpTimeRemaining = state.otpTimeRemaining,
+                    otpAttemptsRemaining = state.otpAttemptsRemaining,
+                    isOtpExpired = state.isOtpExpired,
+                    otpError = state.otpError,
+                    isValidatingOtp = state.isValidatingOtp,
+                    generatedOtp = state.generatedOtp, // Pass the generated OTP
                     onOtpChanged = viewModel::onOtpChanged,
                     onValidateOtp = viewModel::validateOtp,
                     onResendOtp = viewModel::resendOtp,
@@ -97,9 +90,9 @@ fun AuthApp(
             
             AuthScreen.Session -> {
                 SessionScreen(
-                    email = savedState.email,
-                    sessionStartTime = savedState.sessionStartTime,
-                    sessionDurationSeconds = savedState.sessionDurationSeconds,
+                    email = state.email,
+                    sessionStartTime = state.sessionStartTime,
+                    sessionDurationSeconds = state.sessionDurationSeconds,
                     onLogout = viewModel::logout,
                     modifier = Modifier.padding(paddingValues)
                 )

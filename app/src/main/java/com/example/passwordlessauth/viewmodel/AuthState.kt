@@ -22,6 +22,7 @@ data class AuthState(
     val otpAttemptsRemaining: Int = 3,
     val isOtpExpired: Boolean = false,
     val otpError: String? = null,
+    val generatedOtp: String = "", // For displaying the OTP to user (testing purposes)
     
     // Session screen state
     val sessionStartTime: Long = 0L,

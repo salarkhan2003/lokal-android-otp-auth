@@ -84,7 +84,8 @@ class AuthViewModel : ViewModel() {
                     otpTimeRemaining = OTP_DURATION_SECONDS,
                     otpAttemptsRemaining = 3,
                     isOtpExpired = false,
-                    otpError = null
+                    otpError = null,
+                    generatedOtp = otp // Store the OTP for display
                 )
                 
                 startOtpTimer()
@@ -159,12 +160,23 @@ class AuthViewModel : ViewModel() {
                             result.attemptsRemaining
                         )
                         
-                        _state.value = _state.value.copy(
-                            isValidatingOtp = false,
-                            otpAttemptsRemaining = result.attemptsRemaining,
-                            otpError = "Incorrect OTP. ${result.attemptsRemaining} attempts remaining.",
-                            otpInput = ""
-                        )
+                        if (result.attemptsRemaining == 0) {
+                            // No attempts remaining - timeout
+                            _state.value = _state.value.copy(
+                                isValidatingOtp = false,
+                                otpAttemptsRemaining = 0,
+                                otpError = "Maximum attempts exceeded. Please generate a new OTP.",
+                                otpInput = ""
+                            )
+                            stopOtpTimer()
+                        } else {
+                            _state.value = _state.value.copy(
+                                isValidatingOtp = false,
+                                otpAttemptsRemaining = result.attemptsRemaining,
+                                otpError = "Incorrect OTP. ${result.attemptsRemaining} attempts remaining.",
+                                otpInput = ""
+                            )
+                        }
                     }
                     
                     is OtpValidationResult.Expired -> {
@@ -244,7 +256,8 @@ class AuthViewModel : ViewModel() {
             currentScreen = AuthScreen.Login,
             otpInput = "",
             otpError = null,
-            errorMessage = null
+            errorMessage = null,
+            generatedOtp = "" // Clear the generated OTP
         )
     }
     

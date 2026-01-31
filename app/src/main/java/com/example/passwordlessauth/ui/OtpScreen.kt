@@ -30,6 +30,7 @@ fun OtpScreen(
     isOtpExpired: Boolean,
     otpError: String?,
     isValidatingOtp: Boolean,
+    generatedOtp: String, // Add this parameter to display the OTP
     onOtpChanged: (String) -> Unit,
     onValidateOtp: () -> Unit,
     onResendOtp: () -> Unit,
@@ -89,6 +90,44 @@ fun OtpScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
+            // Display the generated OTP for testing purposes
+            if (generatedOtp.isNotEmpty()) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Your OTP Code",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = generatedOtp,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            letterSpacing = 4.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Enter this code below",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+            
             // Timer display
             if (!isOtpExpired && otpTimeRemaining > 0) {
                 Card(
@@ -119,11 +158,17 @@ fun OtpScreen(
             // OTP input field
             OutlinedTextField(
                 value = otpInput,
-                onValueChange = onOtpChanged,
+                onValueChange = { newValue ->
+                    // Handle input directly to prevent recomposition issues
+                    val numericOnly = newValue.filter { it.isDigit() }
+                    if (numericOnly.length <= 6) {
+                        onOtpChanged(numericOnly)
+                    }
+                },
                 label = { Text("6-Digit Code") },
                 placeholder = { Text("000000") },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword,
+                    keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done,
                     autoCorrect = false
                 ),

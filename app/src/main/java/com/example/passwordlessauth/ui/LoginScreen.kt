@@ -6,20 +6,16 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Login screen composable that handles email input and OTP generation.
- * Follows Compose best practices with proper state hoisting and no business logic.
- */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     email: String,
@@ -32,14 +28,14 @@ fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    
+
     // Clear error when email changes
     LaunchedEffect(email) {
         if (errorMessage != null) {
             onClearError()
         }
     }
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -47,30 +43,28 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Title
         Text(
             text = "Welcome",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
             text = "Enter your email to get started",
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
-        // Email input field
+
         OutlinedTextField(
             value = email,
             onValueChange = { newValue ->
-                onEmailChanged(newValue)
+                // Handle input directly to prevent recomposition issues
+                onEmailChanged(newValue.trim())
             },
             label = { Text("Email Address") },
             placeholder = { Text("Enter your email") },
@@ -79,7 +73,7 @@ fun LoginScreen(
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
-                onDone = {
+                onDone = { 
                     keyboardController?.hide()
                     if (isEmailValid && !isGeneratingOtp) {
                         onGenerateOtp()
@@ -88,15 +82,12 @@ fun LoginScreen(
             ),
             singleLine = true,
             isError = errorMessage != null,
-            supportingText = if (errorMessage != null) {
-                { Text(errorMessage, color = MaterialTheme.colorScheme.error) }
-            } else null,
+            supportingText = errorMessage?.let { { Text(it) } },
             modifier = Modifier.fillMaxWidth()
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
-        // Generate OTP button
+
         Button(
             onClick = onGenerateOtp,
             enabled = isEmailValid && !isGeneratingOtp,
@@ -111,7 +102,7 @@ fun LoginScreen(
                     strokeWidth = 2.dp
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Generating OTP...")
+                Text("Generating...")
             } else {
                 Text(
                     text = "Get OTP",
@@ -123,20 +114,29 @@ fun LoginScreen(
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Info text
+        // Info card
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
         ) {
-            Text(
-                text = "We'll send you a 6-digit code that expires in 60 seconds. You have 3 attempts to enter it correctly.",
-                modifier = Modifier.padding(16.dp),
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "How it works",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "• Enter your email address\n• We'll send you a 6-digit verification code\n• Enter the code to access your account",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
